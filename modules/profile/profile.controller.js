@@ -32,7 +32,7 @@ exports.getAllUsers = async (req, res, next) => {
         return sendResponse(
             res,
             200,
-            'All Users fetched successfully',
+            'Users List fetched successfully',
             profiles
         );
 
