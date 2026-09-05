@@ -27,21 +27,16 @@ exports.createUser = async (req, res, next) => {
 // Get All Users
 exports.getAllUsers = async (req, res, next) => {
     try {
-        console.log('GET ALL USERS - START');
-
         const profiles = await Profile.find();
 
-        console.log('GET ALL USERS - FOUND:', profiles.length);
-
-        return res.status(200).json({
-            code: 200,
-            success: true,
-            message: 'Users fetched successfully',
-            data: profiles
-        });
+        return sendResponse(
+            res,
+            200,
+            'All Users fetched successfully',
+            profiles
+        );
 
     } catch (error) {
-        console.error('GET ALL USERS ERROR:', error);
         next(error);
     }
 };
