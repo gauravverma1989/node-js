@@ -29,6 +29,10 @@ const profileSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true
+    },
+    role: {
+        type: Number,
+        required: true
     }
 }, {
     timestamps: true

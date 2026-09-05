@@ -5,7 +5,9 @@ const cors = require('cors');
 
 const connectDB = require('./config/database');
 const profileRoutes = require('./modules/profile/profile.routes');
+const roleRoutes = require('./modules/roles/role.routes');
 const errorHandler = require('./utils/errorHandler');
+
 
 const app = express();
 
@@ -16,6 +18,7 @@ app.use(express.json());
 
 // Routes
 app.use('/profile', profileRoutes);
+app.use('/role', roleRoutes);
 
 // Health check
 app.get('/', (req, res) => {
