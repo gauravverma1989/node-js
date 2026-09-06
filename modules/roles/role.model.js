@@ -17,11 +17,13 @@ const roleSchema = new mongoose.Schema(
         },
         description: {
             type: String,
-            default: ''
+            default: '',
+            required: true,
         },
         isActive: {
             type: Boolean,
-            default: true
+            default: true,
+            required: true,
         }
     },
     {

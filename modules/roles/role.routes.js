@@ -8,10 +8,8 @@ router.post('/create', roleController.createRole);
 
 router.get('/list', roleController.getRoles);
 
-router.get('/get-by-role', roleController.getRoleById);
+router.put('/update', roleController.updateRole);
 
-router.put('/update-by-role', roleController.updateRole);
-
-router.delete('/delete-by-role', roleController.deleteRole);
+router.delete('/delete', roleController.deleteRole);
 
 module.exports = router;

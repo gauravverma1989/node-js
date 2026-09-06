@@ -44,57 +44,44 @@ exports.createRole = async (req, res, next) => {
 };
 
 
-// Get All Roles
 exports.getRoles = async (req, res, next) => {
     try {
-        const roles = await Role.find()
-            .sort({ id: 1 });
+        const {
+            id,
+            sortBy = 'id',
+            sortOrder = 'asc'
+        } = req.query;
+
+        const filter = {};
+
+        // Filter by ID
+        if (id !== undefined && id !== '') {
+            const roleId = Number(id);
+
+            if (Number.isNaN(roleId)) {
+                return sendResponse(
+                    res,
+                    400,
+                    'Invalid role id',
+                    null
+                );
+            }
+
+            filter.id = roleId;
+        }
+
+        // Sort
+        const sortDirection =
+            sortOrder.toLowerCase() === 'desc' ? -1 : 1;
+
+        const roles = await Role.find(filter)
+            .sort({ [sortBy]: sortDirection });
 
         return sendResponse(
             res,
             200,
             'Roles fetched successfully',
             roles
-        );
-
-    } catch (error) {
-        next(error);
-    }
-};
-
-
-// Get Role By Custom ID
-exports.getRoleById = async (req, res, next) => {
-    try {
-        const roleId = Number(req.query.id);
-
-        if (!roleId) {
-            return sendResponse(
-                res,
-                400,
-                'Role id is required',
-                null
-            );
-        }
-
-        const role = await Role.findOne({
-            id: roleId
-        });
-
-        if (!role) {
-            return sendResponse(
-                res,
-                404,
-                'Role not found',
-                null
-            );
-        }
-
-        return sendResponse(
-            res,
-            200,
-            'Role fetched successfully',
-            role
         );
 
     } catch (error) {

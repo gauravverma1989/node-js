@@ -152,12 +152,30 @@ exports.updateUser = async (req, res, next) => {
     }
 };
 
-
 // Get Users
 exports.getAllUsers = async (req, res, next) => {
     try {
+        const { roleId } = req.query;
 
-        const users = await Profile.find()
+        const filter = {};
+
+        // Filter users by roleId
+        if (roleId !== undefined && roleId !== '') {
+            const parsedRoleId = Number(roleId);
+
+            if (Number.isNaN(parsedRoleId)) {
+                return sendResponse(
+                    res,
+                    400,
+                    'Invalid roleId',
+                    null
+                );
+            }
+
+            filter.role = parsedRoleId;
+        }
+
+        const users = await Profile.find(filter)
             .sort({ id: 1 })
             .lean();
 
@@ -166,7 +184,11 @@ exports.getAllUsers = async (req, res, next) => {
             ...new Set(
                 users
                     .map(user => user.role)
-                    .filter(roleId => roleId !== null && roleId !== undefined)
+                    .filter(
+                        roleId =>
+                            roleId !== null &&
+                            roleId !== undefined
+                    )
             )
         ];
 
@@ -200,4 +222,4 @@ exports.getAllUsers = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-};
+}
