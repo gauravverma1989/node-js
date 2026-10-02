@@ -33,6 +33,22 @@ const profileSchema = new mongoose.Schema({
     role: {
         type: Number,
         required: true
+    },
+    passwordHash: {
+        type: String,
+        select: false
+    },
+    emailVerifiedAt: {
+        type: Date,
+        default: null
+    },
+    emailVerificationTokenHash: {
+        type: String,
+        select: false
+    },
+    emailVerificationExpiresAt: {
+        type: Date,
+        select: false
     }
 }, {
     timestamps: true

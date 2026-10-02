@@ -165,6 +165,24 @@ exports.updateRole = async (req, res, next) => {
             );
         }
 
+        if (role.name === 'ADMIN' && name && name.toUpperCase() !== 'ADMIN') {
+            return sendResponse(
+                res,
+                409,
+                'The ADMIN role name cannot be changed',
+                null
+            );
+        }
+
+        if (role.name === 'ADMIN' && isActive === false) {
+            return sendResponse(
+                res,
+                409,
+                'The ADMIN role cannot be deactivated',
+                null
+            );
+        }
+
         // Check duplicate role name
         if (name) {
             const roleName = name.toUpperCase();
@@ -232,6 +250,15 @@ exports.deleteRole = async (req, res, next) => {
                 res,
                 404,
                 'Role not found',
+                null
+            );
+        }
+
+        if (role.name === 'ADMIN') {
+            return sendResponse(
+                res,
+                409,
+                'The ADMIN role cannot be deleted',
                 null
             );
         }
