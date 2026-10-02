@@ -44,38 +44,84 @@ exports.createRole = async (req, res, next) => {
 };
 
 
+// Get Roles
 exports.getRoles = async (req, res, next) => {
     try {
         const {
-            id,
+            search,
             sortBy = 'id',
             sortOrder = 'asc'
         } = req.query;
 
         const filter = {};
 
-        // Filter by ID
-        if (id !== undefined && id !== '') {
-            const roleId = Number(id);
+        // Global search
+        if (search !== undefined && search.trim() !== '') {
+            const searchValue = search.trim();
 
-            if (Number.isNaN(roleId)) {
+            const searchConditions = [
+                {
+                    name: {
+                        $regex: searchValue,
+                        $options: 'i'
+                    }
+                },
+                {
+                    description: {
+                        $regex: searchValue,
+                        $options: 'i'
+                    }
+                }
+            ];
+
+            // Search by role ID when numeric
+            if (!Number.isNaN(Number(searchValue))) {
+                searchConditions.push({
+                    id: Number(searchValue)
+                });
+            }
+
+            filter.$or = searchConditions;
+        }
+
+        // Allowed sort fields
+        const allowedSortFields = {
+            id: 'id',
+            name: 'name',
+            description: 'description',
+            isActive: 'isActive'
+        };
+
+        const selectedSortField =
+            allowedSortFields[sortBy] || 'id';
+
+        // Sort order
+        let normalizedSortOrder = 'ASC';
+
+        if (sortOrder !== undefined && sortOrder !== '') {
+            normalizedSortOrder = sortOrder.toUpperCase();
+
+            if (
+                normalizedSortOrder !== 'ASC' &&
+                normalizedSortOrder !== 'DESC'
+            ) {
                 return sendResponse(
                     res,
                     400,
-                    'Invalid role id',
+                    'Invalid sortOrder. Use ASC or DESC',
                     null
                 );
             }
-
-            filter.id = roleId;
         }
 
-        // Sort
         const sortDirection =
-            sortOrder.toLowerCase() === 'desc' ? -1 : 1;
+            normalizedSortOrder === 'ASC' ? 1 : -1;
 
         const roles = await Role.find(filter)
-            .sort({ [sortBy]: sortDirection });
+            .sort({
+                [selectedSortField]: sortDirection
+            })
+            .lean();
 
         return sendResponse(
             res,

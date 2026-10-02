@@ -153,9 +153,16 @@ exports.updateUser = async (req, res, next) => {
 };
 
 // Get Users
+
+// Get Users
 exports.getAllUsers = async (req, res, next) => {
     try {
-        const { roleId } = req.query;
+        const {
+            roleId,
+            search,
+            sortBy,
+            sortOrder
+        } = req.query;
 
         const filter = {};
 
@@ -175,8 +182,71 @@ exports.getAllUsers = async (req, res, next) => {
             filter.role = parsedRoleId;
         }
 
+
+        // Global search
+        if (search !== undefined && search.trim() !== '') {
+            const searchValue = search.trim();
+
+            filter.$or = [
+                {
+                    name: {
+                        $regex: searchValue,
+                        $options: 'i'
+                    }
+                },
+                {
+                    email: {
+                        $regex: searchValue,
+                        $options: 'i'
+                    }
+                },
+                {
+                    designation: {
+                        $regex: searchValue,
+                        $options: 'i'
+                    }
+                }
+            ];
+        }
+
+        // Allowed sort fields
+        const allowedSortFields = {
+            id: 'id',
+            name: 'name',
+            designation: 'designation',
+            age: 'age',
+            role: 'role'
+        };
+
+        const selectedSortField =
+            allowedSortFields[sortBy] || 'id';
+
+        // Sort order
+        let normalizedSortOrder = 'ASC';
+
+        if (sortOrder !== undefined && sortOrder !== '') {
+            normalizedSortOrder = sortOrder.toUpperCase();
+
+            if (
+                normalizedSortOrder !== 'ASC' &&
+                normalizedSortOrder !== 'DESC'
+            ) {
+                return sendResponse(
+                    res,
+                    400,
+                    'Invalid sortOrder. Use ASC or DESC',
+                    null
+                );
+            }
+        }
+
+        const sortDirection =
+            normalizedSortOrder === 'ASC' ? 1 : -1;
+
         const users = await Profile.find(filter)
-            .sort({ id: 1 })
+            .sort({
+                [selectedSortField]: sortDirection
+            })
             .lean();
 
         // Get all role IDs used by users
@@ -199,7 +269,7 @@ exports.getAllUsers = async (req, res, next) => {
             .select('id name description isActive')
             .lean();
 
-        // Create lookup object
+        // Create role lookup
         const roleMap = {};
 
         roles.forEach(role => {
@@ -222,4 +292,4 @@ exports.getAllUsers = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-}
+};
